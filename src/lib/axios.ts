@@ -35,11 +35,23 @@ api.interceptors.request.use((config) => {
 });
 
 // ---------- Response interceptor: auto-refresh on 401 ----------
+// Auth endpoints that should NOT trigger token-refresh logic
+const AUTH_ENDPOINTS = ["/auth/login/", "/auth/register/", "/auth/token/refresh/"];
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const original = error.config;
-    if (error.response?.status === 401 && !original._retry) {
+    const requestUrl = original?.url || "";
+
+    // Skip refresh logic for auth endpoints – let the caller handle the error directly
+    const isAuthEndpoint = AUTH_ENDPOINTS.some((ep) => requestUrl.endsWith(ep));
+
+    if (
+      error.response?.status === 401 &&
+      !original._retry &&
+      !isAuthEndpoint
+    ) {
       original._retry = true;
       try {
         const tokens = JSON.parse(localStorage.getItem("tokens") || "{}");

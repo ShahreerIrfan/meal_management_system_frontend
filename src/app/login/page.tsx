@@ -41,8 +41,12 @@ function LoginContent() {
       toast.success("Login successful!");
       router.push(redirectTo);
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { errors?: { detail?: string } } } };
-      toast.error(error.response?.data?.errors?.detail || "Login failed");
+      const error = err as { response?: { data?: { detail?: string; errors?: { detail?: string } } } };
+      const message =
+        error.response?.data?.errors?.detail ||
+        error.response?.data?.detail ||
+        "Invalid email or password";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
