@@ -3,7 +3,14 @@
  */
 import axios from "axios";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const PRODUCTION_API_URL = "https://meal-management-system-backend-zcpt.vercel.app/api/v1";
+const DEV_API_URL = "http://localhost:8000/api/v1";
+
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (typeof window !== "undefined" && window.location.hostname !== "localhost"
+    ? PRODUCTION_API_URL
+    : DEV_API_URL);
 
 const api = axios.create({
   baseURL: API_URL,
