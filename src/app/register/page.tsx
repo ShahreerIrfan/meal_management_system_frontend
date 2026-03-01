@@ -46,12 +46,14 @@ export default function RegisterPage() {
       toast.success("Registration successful! Please login.");
       router.push("/login");
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { errors?: Record<string, string[]> } } };
+      const error = err as { response?: { data?: { errors?: Record<string, string[]>; detail?: string } }; message?: string };
       const errors = error.response?.data?.errors;
       if (errors) {
         Object.values(errors).flat().forEach((msg) => toast.error(String(msg)));
+      } else if (error.response?.data?.detail) {
+        toast.error(error.response.data.detail);
       } else {
-        toast.error("Registration failed");
+        toast.error(error.message || "Registration failed – cannot reach the server");
       }
     } finally {
       setLoading(false);
