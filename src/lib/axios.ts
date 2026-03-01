@@ -43,16 +43,19 @@ api.interceptors.response.use(
       original._retry = true;
       try {
         const tokens = JSON.parse(localStorage.getItem("tokens") || "{}");
+        if (!tokens.refresh) throw new Error("No refresh token");
         const res = await axios.post(`${API_URL}/auth/token/refresh/`, {
           refresh: tokens.refresh,
         });
-        const newTokens = { access: res.data.access, refresh: res.data.refresh };
+        const newTokens = { access: res.data.access, refresh: res.data.refresh || tokens.refresh };
         localStorage.setItem("tokens", JSON.stringify(newTokens));
         original.headers.Authorization = `Bearer ${newTokens.access}`;
         return api(original);
       } catch {
+        // Only clear tokens and redirect if refresh actually failed
         localStorage.removeItem("tokens");
         localStorage.removeItem("active_flat_id");
+        localStorage.removeItem("user");
         if (typeof window !== "undefined") {
           window.location.href = "/login";
         }

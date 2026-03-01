@@ -23,7 +23,14 @@ export const useAuthStore = create<AuthState>((set) => ({
   activeFlatId: null,
   permissions: [],
 
-  setUser: (user) => set({ user }),
+  setUser: (user) => {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+    }
+    set({ user });
+  },
 
   setTokens: (tokens) => {
     if (tokens) {
@@ -48,15 +55,18 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: () => {
     localStorage.removeItem("tokens");
     localStorage.removeItem("active_flat_id");
+    localStorage.removeItem("user");
     set({ user: null, tokens: null, activeFlatId: null, permissions: [] });
   },
 
   hydrate: () => {
     const tokens = localStorage.getItem("tokens");
     const flatId = localStorage.getItem("active_flat_id");
+    const user = localStorage.getItem("user");
     set({
       tokens: tokens ? JSON.parse(tokens) : null,
       activeFlatId: flatId || null,
+      user: user ? JSON.parse(user) : null,
     });
   },
 }));
